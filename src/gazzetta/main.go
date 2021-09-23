@@ -51,7 +51,7 @@ func main() {
 					break
 				}
 				reader:=bufio.NewReader(resp.Body)
-				if f, ferr := os.Create("/tmp/" + nowString + "_"+ strconv.Itoa(page) + ".jpg"); err == nil{
+				if f, ferr := os.Create(nowString + "_"+ strconv.Itoa(page) + ".jpg"); err == nil{
 					writer:=bufio.NewWriter(f)
 					reader.WriteTo(writer) // I dont really care at this stages
 					writer.Flush()
