@@ -38,7 +38,6 @@ func main() {
 		nowString := now.Format("20060102")
 		year := now.Format("2006")
 
-	pageLoop:
 		for page := 0; ; page += 1 {
 			notFoundOrEmpty := false
 			url := fmt.Sprintf(pattern, year, nowString, page)
@@ -51,6 +50,7 @@ func main() {
 				if resp.ContentLength <= 0 {
 					fmt.Printf("Page %d of %s has no content\n", page, nowString)
 					notFoundOrEmpty = true
+                                        break
 				}
 				reader := bufio.NewReader(resp.Body)
 				if f, ferr := os.Create(nowString + "_" + strconv.Itoa(page) + ".jpg"); err == nil {
@@ -64,7 +64,7 @@ func main() {
 				resp.Body.Close()
 			}
 			if page > 1 && notFoundOrEmpty {
-				break pageLoop
+				break
 			}
 
 		}
