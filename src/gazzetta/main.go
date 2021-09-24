@@ -34,20 +34,23 @@ func main() {
 		os.Exit(1)
 	}
 	for now = from; to.Sub(now) >= 0; now = now.Add(time.Hour * 24) {
+
 		nowString := now.Format("20060102")
 		year := now.Format("2006")
 
+	pageLoop:
 		for page := 0; ; page += 1 {
+			notFoundOrEmpty := false
 			url := fmt.Sprintf(pattern, year, nowString, page)
 			resp, _ := client.Get(url)
 			switch resp.StatusCode {
 			case 404:
-				fmt.Printf("Page %s of %d was not found:\n", page, now)
-				break
+				fmt.Printf("Page %d of %s was not found\n", page, nowString)
+				notFoundOrEmpty = true
 			case 200, 201, 202:
 				if resp.ContentLength <= 0 {
-					fmt.Printf("Page %s of %d has no content\n", nowString, page)
-					break
+					fmt.Printf("Page %d of %s has no content\n", page, nowString)
+					notFoundOrEmpty = true
 				}
 				reader := bufio.NewReader(resp.Body)
 				if f, ferr := os.Create(nowString + "_" + strconv.Itoa(page) + ".jpg"); err == nil {
@@ -59,6 +62,9 @@ func main() {
 					fmt.Printf(ferr.Error())
 				}
 				resp.Body.Close()
+			}
+			if page > 1 && notFoundOrEmpty {
+				break pageLoop
 			}
 
 		}
