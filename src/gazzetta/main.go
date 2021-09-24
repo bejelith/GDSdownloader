@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"bufio"
 	"fmt"
@@ -15,7 +14,7 @@ import "flag"
 var pattern = "http://archiviostorico.gazzettadelsud.it/gazzettasud/books/messina/%s/%smessina/images/pages/Page-%d.jpg"
 var fromDate = flag.String("from", "2021-01-01", "from")
 var toDate = flag.String("to", "2021-01-03", "to")
-var printHelp = flag.Bool("help", false,"Print help")
+var printHelp = flag.Bool("help", false, "Print help")
 
 func main() {
 	flag.Parse()
@@ -34,29 +33,29 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	for now = from; to.Sub(now) >= 0  ; now = now.Add(time.Hour*24) {
+	for now = from; to.Sub(now) >= 0; now = now.Add(time.Hour * 24) {
 		nowString := now.Format("20060102")
 		year := now.Format("2006")
 
-		for page:= 0;page <20; page+=1 {
-			url:= fmt.Sprintf(pattern, year, nowString, page)
+		for page := 0; ; page += 1 {
+			url := fmt.Sprintf(pattern, year, nowString, page)
 			resp, _ := client.Get(url)
 			switch resp.StatusCode {
 			case 404:
-				fmt.Printf("Page %s %d was not found:\n", nowString, page)
+				fmt.Printf("Page %s of %d was not found:\n", page, now)
 				break
-			case 200,201,202:
-				if resp.ContentLength <=0 {
+			case 200, 201, 202:
+				if resp.ContentLength <= 0 {
 					fmt.Printf("Page %s of %d has no content\n", nowString, page)
 					break
 				}
-				reader:=bufio.NewReader(resp.Body)
-				if f, ferr := os.Create(nowString + "_"+ strconv.Itoa(page) + ".jpg"); err == nil{
-					writer:=bufio.NewWriter(f)
+				reader := bufio.NewReader(resp.Body)
+				if f, ferr := os.Create(nowString + "_" + strconv.Itoa(page) + ".jpg"); err == nil {
+					writer := bufio.NewWriter(f)
 					reader.WriteTo(writer) // I dont really care at this stages
 					writer.Flush()
 					f.Close()
-				}else{
+				} else {
 					fmt.Printf(ferr.Error())
 				}
 				resp.Body.Close()
